@@ -1,0 +1,7 @@
+-neko bin/map_matching_lab.n
+-cmd nekotools boot bin/map_matching_lab.n
+
+-cp .
+-cp dep
+
+-main Lab
