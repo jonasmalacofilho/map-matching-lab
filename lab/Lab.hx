@@ -1,88 +1,112 @@
+import Config;
 import def.*;
 import def.io.*;
 import def.network.*;
 import def.network.LinkDirection;
 import GeoJson;
+import haxe.Json;
 import haxe.unit.TestRunner;
-import mapMatching.*;
-import sys.FileSystem;
-import test.TestMatch;
-import sys.io.File;
-
 import Lambda.*;
+import mapMatching.*;
 import Math.*;
+import sys.FileSystem;
+import sys.io.File;
+import test.TestMatch;
+using Lambda;
 
 class Lab {
 
-	static
-	function main() {
-		var args = Sys.args();
-		var path = args.length > 0 ? args.pop() : '.';
+	var config:Config;
+	var algoTests:Array<{ runner:TestRunner, tests:Array<TestMatch> }>;
 
-		var algos:Array<MapMatchingAlgo> = [ new Shrimp() ];
+	public
+	function new( config:Config ) {
+		this.config = config;
+		if ( config.algorithms == null )
+			config.algorithms = [ "Shrimp" ];
 
+		algoTests = config.algorithms.map( initAlgo ).map( prepareAlgoTests );
+	}
+
+	public
+	function run() {
+		algoTests.iter( runTest );
+	}
+
+	function prepareAlgoTests( algo:MapMatchingAlgo ) {
+		var runner = new TestRunner();
 		var tests = [];
-		var testRunner = new TestRunner();
 
-		function discover( path ) {
-			var nodesLocation = path + "/nodes.geojson";
-			var linksLocation = path + "/links.geojson";
-			var pathLogsLocation = path + "/pathLogs.geojson";
-			var expectedResultsLocation = path + "/expectedResults.json";
+		for ( netSpec in config.networks ) {
+			var network = readNetwork( netSpec );
 
-			if ( FileSystem.exists( nodesLocation ) && FileSystem.exists( linksLocation ) ) {
-				var network = readNetwork( [ nodesLocation, linksLocation ] );
+			for ( setSpec in netSpec.problemSets ) {
+				var tracks = readTracks( setSpec );
+				var answers = readAnswers( setSpec );
 
-				if ( FileSystem.exists( pathLogsLocation ) ) {
-					var pathLogs = readPathLogs( pathLogsLocation );
-					var expectedResults = null;
+				for ( track in tracks ) {
+					var answer = answers.get( track.id ).map( network.links.get );
 
-					if ( FileSystem.exists( expectedResultsLocation ) ) {
-						expectedResults = readExpectedResults( expectedResultsLocation );
-					}
+					var test = new TestMatch( algo, network, track.pathLog, answer );
+					tests.push( test );
 
-					for ( input in pathLogs ) {
-						for ( algo in algos ) {
-							var expected = expectedResults[input.id];
-							if ( expected == null )
-								expected = [];
-
-							var test = new TestMatch( algo, network, input.pathLog, expected.map( network.links.get ) );
-							test.networkName = path;
-							test.inputName = Std.string( input.id );
-							test.algoName = Type.getClassName( Type.getClass( algo ) );
-							tests.push( test );
-							testRunner.add( test );
-						}
-					}
-					
+					runner.add( test );
 				}
+
 			}
 
-			for ( item in FileSystem.readDirectory( path ) )
-				if ( FileSystem.isDirectory( path + "/" + item ) )
-					discover( path + "/" + item );
 		}
+		return { runner:runner, tests:tests };
+	}
 
-		discover( path );
+	function runTest( algoTest ) {
+		algoTest.runner.run();
+		// TODO save debug info
+	}
 
-		testRunner.run();
+	function initAlgo( name:String ):MapMatchingAlgo {
+		return switch ( name ) {
+		case "Shrimp": new Shrimp();
+		case all: throw 'Unsupported algorithm $name';
+		};
+	}
 
-		for ( test in tests ) {
-			function linkId( link ) return link.id;
-			trace( "network: " + test.networkName + " input: " + test.inputName + " algo: " + test.algoName );
-			trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
-			trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
+	function readNetwork( specs:NetworkSpecs ) {
+		return _readNetwork( specs.files );
+	}
 
-			var name = test.networkName + "/" + test.inputName + "_" + test.algoName;
-			File.saveContent( name + "_matchedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.matchedMap ) );
-			File.saveContent( name + "_expectedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.expectedMap ) );
-		}
+	function readTracks( specs:ProblemSetSpecs ) {
+		return readPathLogs( specs.trackFile );
+	}
 
+	function readAnswers( specs:ProblemSetSpecs ) {
+		return readExpectedResults( specs.answerFile );
 	}
 
 	static
-	function readNetwork( paths:Array<String> ) {
+	function main() {
+		var paths = Sys.args();
+		if ( paths.length == 0 )
+			paths = [ './lab.json' ];
+
+		var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
+
+		labs.iter( function ( lab ) lab.run );
+	}
+
+	// for ( test in tests ) {
+	// 	function linkId( link ) return link.id;
+	// 	trace( "network: " + test.networkName + " input: " + test.inputName + " algo: " + test.algoName );
+	// 	trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
+	// 	trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
+
+	// 	var name = test.networkName + "/" + test.inputName + "_" + test.algoName;
+	// 	File.saveContent( name + "_matchedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.matchedMap ) );
+	// 	File.saveContent( name + "_expectedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.expectedMap ) );
+	// }
+
+	static
+	function _readNetwork( paths:Array<String> ) {
 		var network = new Network();
 		var nodes = [];
 
