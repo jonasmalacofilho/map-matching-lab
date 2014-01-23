@@ -1,0 +1,16 @@
+{
+	"algorithms":null,
+	"networks":[
+		{
+			"name":"Alpha",
+			"files":[ "alpha/nodes.geojson", "alpha/links.geojson" ],
+			"problemSets":[ 
+				{
+					"name":"",
+					"trackFile":"alpha/pathLogs.geojson",
+					"answerFile":"alpha/expectedResults.json"
+				}
+			]
+		}
+	]
+}
