@@ -1,13 +1,13 @@
 import Config;
-import prim.Network;
-import prim.Path;
-import prim.Point;
-import prim.Track;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
 import mapMatching.*;
 import Math.*;
+import prim.Network;
+import prim.Path;
+import prim.Point;
+import prim.Track;
 import SimpleGeography;
 import sys.FileSystem;
 import sys.io.File;
