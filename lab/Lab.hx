@@ -25,7 +25,7 @@ class Lab {
 		if ( config.algorithms == null )
 			config.algorithms = [ "Shrimp" ];
 
-		algoTests = config.algorithms.map( initAlgo ).map( prepareAlgoTests );
+		algoTests = config.algorithms.map( prepareAlgoTests );
 	}
 
 	public
@@ -33,7 +33,7 @@ class Lab {
 		algoTests.iter( runTest );
 	}
 
-	function prepareAlgoTests( algo:MapMatchingAlgo ) {
+	function prepareAlgoTests( algo:String ) {
 		var runner = new TestRunner();
 		var tests = [];
 
@@ -47,7 +47,7 @@ class Lab {
 				for ( track in tracks ) {
 					var answer = answers.get( track.id ).map( network.links.get );
 
-					var test = new TestMatch( algo, network, track, answer );
+					var test = new TestMatch( initAlgo( algo ), network, track, answer );
 					tests.push( test );
 
 					runner.add( test );
