@@ -5,7 +5,7 @@ import def.*;
 import def.io.*;
 import def.network.*;
 import haxe.unit.TestCase;
-import GeoJson;
+import SimpleGeography;
 
 import Lambda.*;
 
@@ -40,7 +40,7 @@ extends TestCase {
 	var levenshteinDistance:Float;
 
 	public
-	var debugInformation:{ matchedMap:GJFeatureCol, expectedMap:GJFeatureCol };
+	var debugInformation:{ matchedMap:GeographySet, expectedMap:GeographySet };
 
 	public
 	function new( algo:MapMatchingAlgo, network:Network, pathLog:PathLog, expectedPath:Path ) {
@@ -82,15 +82,14 @@ extends TestCase {
 	}
 
 	function mapPath( path:Path ) {
-		var col:GJFeatureCol = { features:[] };
+		var col:GeographySet = { features:[] };
 		var pos = 0;
 		for ( link in path ) {
-			var from = { x:link.from.x, y:link.from.y, etc:null };
-			var to = { x:link.to.x, y:link.to.y, etc:null };
+			var from = { x:link.from.x, y:link.from.y, zs:null };
+			var to = { x:link.to.x, y:link.to.y, zs:null };
 			var feature = {
-				geometry:GJLineString( [ from, to ] ),
-				properties:{ linkId:link.id, posInPath:pos },
-				id:pos
+				geometry:LineString( [ from, to ] ),
+				properties:{ linkId:link.id, posInPath:pos }
 			}
 			col.features.push( feature );
 		}

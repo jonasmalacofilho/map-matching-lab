@@ -1,9 +1,8 @@
 import Config;
-import def.*;
 import def.io.*;
 import def.network.*;
 import def.network.LinkDirection;
-import GeoJson;
+import SimpleGeography;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
@@ -91,7 +90,7 @@ class Lab {
 
 		var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
 
-		labs.iter( function ( lab ) lab.run );
+		labs.iter( function ( lab ) lab.run() );
 	}
 
 	// for ( test in tests ) {
@@ -140,13 +139,13 @@ class Lab {
 		}
 
 		for ( path in paths ) {
-			var jsonText = File.getContent( path );
-			var geojson = GeoJsonTools.parseGeoJsonText( jsonText );
-			for ( feature in geojson.features ) {
+			var geojson = Json.parse( File.getContent( path ) );
+			var set = SimpleGeography.fromGeoJson( geojson );
+			for ( feature in set.features ) {
 				switch ( feature.geometry ) {
-				case GJPoint( point ):
+				case SinglePoint( point ):
 					addNode( point.x, point.y );
-				case GJLineString( points ):
+				case LineString( points ):
 					if ( points.length < 2 )
 						throw "Bad number of coordinates for link (there should be at least 2 points)";
 					var first = points[0];
@@ -170,12 +169,12 @@ class Lab {
 
 	static
 	function readPathLogs( path:String ) {
-		var pathLogs:Array<{ id:Int, pathLog:Array<Point> }> = [];
-		var jsonText = File.getContent( path );
-		var geojson = GeoJsonTools.parseGeoJsonText( jsonText );
-		for ( feature in geojson.features ) {
+		var pathLogs:Array<{ id:Int, pathLog:Array<def.Point> }> = [];
+		var geojson = Json.parse( File.getContent( path ) );
+		var set = SimpleGeography.fromGeoJson( geojson );
+		for ( feature in set.features ) {
 			switch ( feature.geometry ) {
-			case GJLineString( points ):
+			case LineString( points ):
 				var data:{ id:Int } = feature.properties;
 				pathLogs.push( { id:data.id, pathLog:points.map( toPoint ) } );
 			case all:
@@ -196,8 +195,8 @@ class Lab {
 	}
 
 	static
-	function toPoint( point:GJGeoPoint ) {
-		return new Point( point.x, point.y );
+	function toPoint( point:Point ) {
+		return new def.Point( point.x, point.y );
 	}
 
 }
