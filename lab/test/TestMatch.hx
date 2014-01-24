@@ -1,10 +1,8 @@
 package test;
 
-import mapMatching.MapMatchingAlgo;
-import def.*;
-import def.io.*;
-import def.network.*;
 import haxe.unit.TestCase;
+import mapMatching.MapMatchingAlgo;
+import prim.*;
 import SimpleGeography;
 
 import Lambda.*;
@@ -28,7 +26,7 @@ extends TestCase {
 	var network:Network;
 
 	public
-	var pathLog:PathLog;
+	var pathLog:Track;
 
 	public
 	var expectedPath:Path;
@@ -43,7 +41,7 @@ extends TestCase {
 	var debugInformation:{ matchedMap:GeographySet, expectedMap:GeographySet };
 
 	public
-	function new( algo:MapMatchingAlgo, network:Network, pathLog:PathLog, expectedPath:Path ) {
+	function new( algo:MapMatchingAlgo, network:Network, pathLog:Track, expectedPath:Path ) {
 		// init
 		super();
 		networkName = "";

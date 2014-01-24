@@ -1,12 +1,12 @@
 package mapMatching;
 
-import def.io.Path;
-import def.io.PathLog;
-import def.network.Network;
+import prim.Path;
+import prim.Track;
+import prim.Network;
 
 interface MapMatchingAlgo {
 
 	public
-	function matchPath( network:Network, pathLog:PathLog ):Path;
+	function matchPath( network:Network, track:Track ):Path;
 
 }

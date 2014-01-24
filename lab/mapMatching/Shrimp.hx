@@ -1,11 +1,11 @@
 package mapMatching;
 
-import def.*;
-import def.io.*;
-import def.network.*;
-
 import Lambda.*;
 import Math.*;
+import prim.Network;
+import prim.Path;
+import prim.Point;
+import prim.Track;
 
 /**
 	Shrimp - Simplified TrImp3 map-matching algorithm
@@ -18,9 +18,9 @@ implements MapMatchingAlgo {
 	function new() {}
 
 	public
-	function matchPath( network:Network, pathLog:PathLog ):Path {
+	function matchPath( network:Network, track:Track ):Path {
 		var g = prepareGraph( network );
-		var points = array( pathLog );
+		var points = array( track.points );
 		
 		traverseGraph( g, points );
 		var path = rebuildPath( g, points );
@@ -120,7 +120,7 @@ implements MapMatchingAlgo {
 
 	function linkLen( link:Link ) {
 		var len = 0.;
-		var pre:def.Point = link.from;
+		var pre:Point = link.from;
 		for ( infl in link.inflections ) {
 			len += dist( pre, infl );
 			pre = infl;

@@ -1,13 +1,14 @@
 import Config;
-import def.io.*;
-import def.network.*;
-import def.network.LinkDirection;
-import SimpleGeography;
+import prim.Network;
+import prim.Path;
+import prim.Point;
+import prim.Track;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
 import mapMatching.*;
 import Math.*;
+import SimpleGeography;
 import sys.FileSystem;
 import sys.io.File;
 import test.TestMatch;
@@ -46,7 +47,7 @@ class Lab {
 				for ( track in tracks ) {
 					var answer = answers.get( track.id ).map( network.links.get );
 
-					var test = new TestMatch( algo, network, track.pathLog, answer );
+					var test = new TestMatch( algo, network, track, answer );
 					tests.push( test );
 
 					runner.add( test );
@@ -169,19 +170,19 @@ class Lab {
 
 	static
 	function readPathLogs( path:String ) {
-		var pathLogs:Array<{ id:Int, pathLog:Array<def.Point> }> = [];
+		var tracks:Array<{ id:Int, points:Iterable<prim.Point> }> = [];
 		var geojson = Json.parse( File.getContent( path ) );
 		var set = SimpleGeography.fromGeoJson( geojson );
 		for ( feature in set.features ) {
 			switch ( feature.geometry ) {
 			case LineString( points ):
 				var data:{ id:Int } = feature.properties;
-				pathLogs.push( { id:data.id, pathLog:points.map( toPoint ) } );
+				tracks.push( { id:data.id, points:points.map( toPoint ) } );
 			case all:
 				trace( 'ignored feature with geometry of type $all' );
 			}
 		}
-		return pathLogs;
+		return tracks;
 	}
 
 	static
@@ -196,7 +197,7 @@ class Lab {
 
 	static
 	function toPoint( point:Point ) {
-		return new def.Point( point.x, point.y );
+		return new prim.Point( point.x, point.y );
 	}
 
 }

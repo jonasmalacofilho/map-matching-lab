@@ -1,4 +1,4 @@
-package def;
+package prim;
 
 class Point {
 	public

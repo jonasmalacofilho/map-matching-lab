@@ -1,10 +1,28 @@
-package def.network;
+package prim;
 
-import def.*;
+class Network {
+
+	// public
+	// var name:String;
+
+	public
+	var links(default,null):Map<Int,Link>;
+
+	public
+	function new() {
+		links = new Map();
+	}
+	
+}
+
+class Node
+extends Point {
+
+}
 
 class Link {
 	public
-	var id:Id;
+	var id:Int;
 
 	public
 	var from:Node;
@@ -27,3 +45,11 @@ class Link {
 		this.inflections = inflections;
 	}
 }
+
+enum LinkDirection {
+	OneWay;
+	OneWayReversed;
+	TwoWay;
+}
+
+
