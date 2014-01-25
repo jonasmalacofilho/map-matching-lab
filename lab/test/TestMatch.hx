@@ -26,7 +26,7 @@ extends TestCase {
 	var network:Network;
 
 	public
-	var pathLog:Track;
+	var track:Track;
 
 	public
 	var expectedPath:Path;
@@ -41,7 +41,7 @@ extends TestCase {
 	var debugInformation:{ matchedMap:GeographySet, expectedMap:GeographySet };
 
 	public
-	function new( algo:MapMatchingAlgo, network:Network, pathLog:Track, expectedPath:Path ) {
+	function new( algo:MapMatchingAlgo, network:Network, track:Track, expectedPath:Path ) {
 		// init
 		super();
 		networkName = "";
@@ -49,7 +49,7 @@ extends TestCase {
 		algoName = "";
 		this.algo = algo;
 		this.network = network;
-		this.pathLog = pathLog;
+		this.track = track;
 		this.expectedPath = expectedPath;
 	}
 
@@ -59,7 +59,7 @@ extends TestCase {
 			return;
 
 		// compute
-		matchedPath = algo.matchPath( network, pathLog );
+		matchedPath = algo.matchPath( network, track );
 
 		// analyze
 		levenshteinDistance = levenshteinAlign( expectedPath, matchedPath );
