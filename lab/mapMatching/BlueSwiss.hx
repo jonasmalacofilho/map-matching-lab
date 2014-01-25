@@ -14,7 +14,12 @@ implements MapMatchingAlgo {
 	// and that's it, nothing more!
 
 	public
-	function new() {}
+	var algorithmName(default,null):String;
+
+	public
+	function new() {
+		algorithmName = "BlueSwiss";
+	}
 
 	public
 	function matchPath( network:Network, track:Track ):Path {

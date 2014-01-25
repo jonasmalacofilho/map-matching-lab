@@ -6,7 +6,7 @@
 			"files":[ "alpha/nodes.geojson", "alpha/links.geojson" ],
 			"problemSets":[ 
 				{
-					"name":"",
+					"name":"set0",
 					"trackFile":"alpha/pathLogs.geojson",
 					"answerFile":"alpha/expectedResults.json"
 				}

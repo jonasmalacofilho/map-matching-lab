@@ -15,7 +15,12 @@ class Shrimp
 implements MapMatchingAlgo {
 
 	public
-	function new() {}
+	var algorithmName(default,null):String;
+
+	public
+	function new() {
+		algorithmName = "Shrimp";
+	}
 
 	public
 	function matchPath( network:Network, track:Track ):Path {

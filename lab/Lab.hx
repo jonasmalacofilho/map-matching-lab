@@ -59,9 +59,20 @@ class Lab {
 		return { runner:runner, tests:tests };
 	}
 
-	function runTest( algoTest ) {
+	function runTest( algoTest:{ runner:TestRunner, tests:Array<TestMatch> } ) {
 		algoTest.runner.run();
-		// TODO save debug info
+
+		for ( test in algoTest.tests ) {
+			function linkId( link ) return link.id;
+			var name = test.algo.algorithmName+"_"+test.network.name+"_"+test.track.setName+"_"+test.track.id;
+
+			trace( "problem: " + name );
+			trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
+			trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
+
+			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap ) ) );
+			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap ) ) );
+		}
 	}
 
 	function initAlgo( name:String ):MapMatchingAlgo {
@@ -73,42 +84,8 @@ class Lab {
 	}
 
 	function readNetwork( specs:NetworkSpecs ) {
-		return _readNetwork( specs.files );
-	}
-
-	function readTracks( specs:ProblemSetSpecs ) {
-		return readPathLogs( specs.trackFile );
-	}
-
-	function readAnswers( specs:ProblemSetSpecs ) {
-		return readExpectedResults( specs.answerFile );
-	}
-
-	static
-	function main() {
-		var paths = Sys.args();
-		if ( paths.length == 0 )
-			paths = [ './lab.json' ];
-
-		var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
-
-		labs.iter( function ( lab ) lab.run() );
-	}
-
-	// for ( test in tests ) {
-	// 	function linkId( link ) return link.id;
-	// 	trace( "network: " + test.networkName + " input: " + test.inputName + " algo: " + test.algoName );
-	// 	trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
-	// 	trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
-
-	// 	var name = test.networkName + "/" + test.inputName + "_" + test.algoName;
-	// 	File.saveContent( name + "_matchedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.matchedMap ) );
-	// 	File.saveContent( name + "_expectedPath.json", GeoJsonTools.toGeoJsonText( test.debugInformation.expectedMap ) );
-	// }
-
-	static
-	function _readNetwork( paths:Array<String> ) {
-		var network = new Network();
+		trace( specs );
+		var network = new Network( specs.name );
 		var nodes = [];
 
 		function dist( a:Node, b:Node ) {
@@ -140,7 +117,7 @@ class Lab {
 			return link;
 		}
 
-		for ( path in paths ) {
+		for ( path in specs.files ) {
 			var geojson = Json.parse( File.getContent( path ) );
 			var set = SimpleGeography.fromGeoJson( geojson );
 			for ( feature in set.features ) {
@@ -169,16 +146,15 @@ class Lab {
 		return network;
 	}
 
-	static
-	function readPathLogs( path:String ) {
-		var tracks:Array<{ id:Int, points:Iterable<prim.Point> }> = [];
-		var geojson = Json.parse( File.getContent( path ) );
+	function readTracks( specs:ProblemSetSpecs ) {
+		var tracks:Array<Track> = [];
+		var geojson = Json.parse( File.getContent( specs.trackFile ) );
 		var set = SimpleGeography.fromGeoJson( geojson );
 		for ( feature in set.features ) {
 			switch ( feature.geometry ) {
 			case LineString( points ):
 				var data:{ id:Int } = feature.properties;
-				tracks.push( { id:data.id, points:points.map( toPoint ) } );
+				tracks.push( { setName:specs.name, id:data.id, points:points.map( toPoint ) } );
 			case all:
 				trace( 'ignored feature with geometry of type $all' );
 			}
@@ -186,14 +162,24 @@ class Lab {
 		return tracks;
 	}
 
-	static
-	function readExpectedResults( path:String ) {
-		var jsonText = File.getContent( path );
+	function readAnswers( specs:ProblemSetSpecs ) {
+		var jsonText = File.getContent( specs.answerFile );
 		var data:Array<{ id:Int, path:Array<Int> }> = haxe.Json.parse( jsonText );
 		var expectedResults = new Map();
 		for ( res in data )
 			expectedResults[res.id] = res.path;
 		return expectedResults;
+	}
+
+	static
+	function main() {
+		var paths = Sys.args();
+		if ( paths.length == 0 )
+			paths = [ './lab.json' ];
+
+		var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
+
+		labs.iter( function ( lab ) lab.run() );
 	}
 
 	static

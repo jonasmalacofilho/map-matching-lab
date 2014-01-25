@@ -2,14 +2,15 @@ package prim;
 
 class Network {
 
-	// public
-	// var name:String;
+	public
+	var name:String;
 
 	public
 	var links(default,null):Map<Int,Link>;
 
 	public
-	function new() {
+	function new( name:String ) {
+		this.name = name;
 		links = new Map();
 	}
 	
