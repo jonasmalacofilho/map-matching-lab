@@ -23,7 +23,7 @@ class Lab {
 	function new( config:Config ) {
 		this.config = config;
 		if ( config.algorithms == null )
-			config.algorithms = [ "Shrimp" ];
+			config.algorithms = [ "Shrimp", "BlueSwiss" ];
 
 		algoTests = config.algorithms.map( prepareAlgoTests );
 	}
@@ -67,6 +67,7 @@ class Lab {
 	function initAlgo( name:String ):MapMatchingAlgo {
 		return switch ( name ) {
 		case "Shrimp": new Shrimp();
+		case "BlueSwiss": new BlueSwiss();
 		case all: throw 'Unsupported algorithm $name';
 		};
 	}
