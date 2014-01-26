@@ -1,5 +1,6 @@
 package mapMatching;
 
+import haxe.unit.TestCase;
 import Lambda.*;
 import Math.*;
 import prim.Network;
@@ -155,4 +156,92 @@ private
 typedef Graph = {
 	var vertices:Map<Node,Vertex>;
 	var arcs:Array<Arc>;
+}
+
+@:access( mapMatching.Shrimp )
+class TestShrimp
+extends TestCase {
+
+	var instance:Shrimp;
+
+	override
+	function setup() {
+		instance = new Shrimp();
+	}
+
+	public
+	function testPathReconstruction0() {
+		var expected = [ 11, 12, 21, 22, 31, 32 ];
+		var precedence =
+		[
+			// node id, link precedence list (by level)
+			// each link has the id its .from vertex
+			[33,null,null,32],
+			[32,null,null,31],
+			[31,null,null,22],
+			[22,null,21,null],
+			[21,null,12,null],
+			[12,11,null,null],
+			[11,null,null,null]
+		];
+		assertEquals( str( expected ), str( path( precedence, 33 ) ) );
+	}
+
+	public
+	function testPathReconstruction1() {
+		var expected = [ 11, 21, 31 ];
+		var precedence =
+		[
+			// node id, link precedence list (by level)
+			// each link has the id its .from vertex
+			[32,null,null,31],
+			[31,null,null,21],
+			[21,11,null,null],
+			[11,null,null,null]
+		];
+		assertEquals( str( expected ), str( path( precedence, 32 ) ) );
+	}
+
+	function graphIt( precedence:Array<Array<Null<Int>>> ) {
+		// vertices
+		var vs = new Map<Int,Vertex>();
+		for ( v in precedence ) {
+			var node = new Node( 0., 0. );
+			var cost:Float = v[0]; // "id" saved in the cost
+			vs[v[0]] = { node:node, cost:cost, parent:[] };
+		}
+		// arcs
+		var arcs = new Array<Arc>();
+		for ( v in precedence ) {
+			for ( p in v.slice( 1 ) ) {
+				if ( p == null )
+					continue;
+				var link = new Link( p, null, null, null, null );
+				var arc = { link:link, from:vs[p], to:vs[v[0]], cost:0. };
+				arcs.push( arc );
+				vs[v[0]].parent.push( arc );
+			}
+		}
+		// trace( arcs.map( function ( arc ) return '${arc.link.id} ${arc.from.cost} ${arc.to.cost}' ) );
+		var vertices = new Map<Node,Vertex>();
+		for ( v in vs )
+			vertices[v.node] = v;
+		return { vertices:vertices, arcs:arcs };
+	}
+
+	function path( precedence:Array<Array<Null<Int>>>, end:Int ) {
+		var g = graphIt( precedence );
+		var to = null;
+		for ( v in g.vertices )
+			if ( Math.abs( v.cost - end ) < .01 )
+				to = v;
+		if ( to == null )
+			throw "Ops!";
+		return array( instance.gpath( g, to ) ).map( function ( arc ) return arc.link.id );
+	}
+
+	function str( d:Dynamic ) {
+		return Std.string( d );
+	}
+
 }
