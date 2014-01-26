@@ -2,7 +2,9 @@ import Config;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
-import mapMatching.*;
+import mapMatching.BlueSwiss;
+import mapMatching.MapMatchingAlgo;
+import mapMatching.Shrimp;
 import Math.*;
 import prim.Network;
 import prim.Path;
@@ -174,12 +176,15 @@ class Lab {
 	static
 	function main() {
 		var paths = Sys.args();
-		if ( paths.length == 0 )
-			paths = [ './lab.json' ];
-
-		var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
-
-		labs.iter( function ( lab ) lab.run() );
+		if ( paths.length != 0 ) {
+			var labs = paths.map( File.getContent ).map( Json.parse ).map( Lab.new );
+			labs.iter( function ( lab ) lab.run() );
+		}
+		else {
+			var t = new TestRunner();
+			t.add( new TestShrimp() );
+			t.run();
+		}
 	}
 
 	static
