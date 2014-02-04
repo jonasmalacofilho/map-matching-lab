@@ -82,12 +82,16 @@ extends TestCase {
 	function mapPath( path:Path ) {
 		var col:GeographySet = { features:[] };
 		var pos = 0;
-		for ( link in path ) {
-			var from = { x:link.from.x, y:link.from.y, zs:null };
-			var to = { x:link.to.x, y:link.to.y, zs:null };
+		for ( seg in path ) {
+			var from = { x:seg.link.from.x, y:seg.link.from.y, zs:null };
+			var to = { x:seg.link.to.x, y:seg.link.to.y, zs:null };
+			var shp = switch ( seg.direction ) {
+			case FromTo: [ from, to ];
+			case ToFrom: [ to, from ];
+			};
 			var feature = {
-				geometry:LineString( [ from, to ] ),
-				properties:{ linkId:link.id, posInPath:pos }
+				geometry:LineString( shp ),
+				properties:{ linkId:seg.link.id, posInPath:pos }
 			}
 			col.features.push( feature );
 		}

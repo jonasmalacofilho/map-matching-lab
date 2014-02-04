@@ -103,7 +103,12 @@ implements MapMatchingAlgo {
 		var gp = gpath( g, to );
 
 		// transform into `:Path` (`Iterable<Link>`)
-		var p = gp.map( function ( arc ) return arc.link );
+		var p = gp.map( function ( arc )
+			return {
+				direction:( arc.from.node==arc.link.from ? FromTo : ToFrom ),
+				link:arc.link
+			}
+		);
 
 		return p;
 	}
