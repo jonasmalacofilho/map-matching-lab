@@ -11,6 +11,7 @@ import prim.Track;
 
 /**
 	Shrimp - Simplified TrImp3 map-matching algorithm
+	Jonas Malaco Filho, 2014
 
 	This solves simplified instances of the problems, but doesn't handle loops
 	all that well.
