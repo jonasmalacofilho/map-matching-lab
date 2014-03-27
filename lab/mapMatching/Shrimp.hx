@@ -110,7 +110,7 @@ implements MapMatchingAlgo {
 			var penFactor = ( pos == 0 || pos == points.length - 1 ) ? 1 : 2;
 			// initial or last point
 			for ( vertex in g.vertices )
-				vertex.cost[pos] = penFactor*dist( vertex.node, point ) + pos > 0 ? vertex.cost[pos-1] : 0.;
+				vertex.cost[pos] = penFactor*dist( vertex.node, point ) + (pos > 0 ? vertex.cost[pos-1] : 0.);
 			
 			// shortest-path on network
 			// Bellman-Ford relaxation for simplicity
