@@ -2,6 +2,7 @@ package mapMatching;
 
 import haxe.unit.TestCase;
 import Lambda.*;
+import Log.debug;
 import Math.*;
 import prim.Network;
 import prim.Path;
@@ -29,9 +30,44 @@ implements MapMatchingAlgo {
 		var points = array( track.points );
 		
 		traverseGraph( g, points );
+
+		saveDebugInfos(g, network.name, track.setName, track.id);
+
 		var path = rebuildPath( g, points );
 
 		return path;
+	}
+
+	function saveDebugInfos(g:Graph, network:String, trackSet:String, trackId:Int) {
+		var b = new StringBuf();
+		b.add('algorithm $algorithmName: network $network: track set $trackSet: track id $trackId\n\n');
+		
+		b.add("Graph precedence list\n");
+		b.add("level <level number>: node <temp node id>: cost <cost> parent <link id> (<temp from node id> -> <temp to node id>)\n");
+		// start at max pos
+		var pos = fold(g.vertices, function (x, pre) return x.parent.length > pre ? x.parent.length : pre, 0);
+		// name the nodes
+		var tempNodeIds = new Map<Node,Int>();
+		var vi = 0;
+		for (v in g.vertices)
+			tempNodeIds.set(v.node, vi++);
+		// print the costs and parents
+		while (--pos >= 0) {
+			var vi = 0;
+			for (v in g.vertices) {
+				b.add('level $pos: node ${tempNodeIds.get(v.node)}: cost ${v.cost} parent ');
+				if (v.parent[pos] != null) {
+					var arc = v.parent[pos];
+					b.add('${arc.link.id} (${tempNodeIds.get(arc.from.node)} -> ${tempNodeIds.get(arc.to.node)})\n');
+				}
+				else {
+					b.add("null\n");
+				}
+			}
+			b.add("\n");
+		}
+
+		debug(b.toString());
 	}
 
 	function prepareGraph( network:Network ) {
