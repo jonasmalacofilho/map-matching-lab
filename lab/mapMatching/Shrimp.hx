@@ -26,7 +26,7 @@ import prim.Track;
 
 	Each of the multiple shortest paths in Shrimp reuses state from the previous
 	one, and one is computed for each input point. Only after all of the input
-	has been used, that a best global solution is choosen by the algorithm.
+	has been used that a best global solution will be choosen by the algorithm.
 
 	Original TrImp algorithm (versions 0.x-3.x) by Jonas Malaco Filho, 2013.
 **/
