@@ -56,9 +56,9 @@ implements MapMatchingAlgo {
 			var minCost = Math.POSITIVE_INFINITY;
 			var minCostId = -1;
 			for (v in g.vertices) {
-				b.add('level $pos: node ${tempNodeIds.get(v.node)}: cost ${v.cost} parent ');
-				if (v.cost < minCost) {
-					minCost = v.cost;
+				b.add('level $pos: node ${tempNodeIds.get(v.node)}: cost ${v.cost[pos]} parent ');
+				if (v.cost[pos] < minCost) {
+					minCost = v.cost[pos];
 					minCostId = tempNodeIds.get(v.node);
 				}
 				if (v.parent[pos] != null) {
@@ -84,10 +84,10 @@ implements MapMatchingAlgo {
 		for ( link in network.links ) {
 			var from = vertices[link.from];
 			if ( from == null )
-				vertices[link.from] = from = { node:link.from, cost:0., parent:[] };
+				vertices[link.from] = from = { node:link.from, cost:[], parent:[] };
 			var to = vertices[link.to];
 			if ( to == null )
-				vertices[ link.to ] = to = { node:link.to, cost:0., parent:[] };
+				vertices[ link.to ] = to = { node:link.to, cost:[], parent:[] };
 			switch ( link.direction ) {
 			case OneWay:
 				arcs.push( { link:link, from:from, to:to, cost:linkLen( link ) } );
@@ -110,7 +110,7 @@ implements MapMatchingAlgo {
 			var penFactor = ( pos == 0 || pos == points.length - 1 ) ? 1 : 2;
 			// initial or last point
 			for ( vertex in g.vertices )
-				vertex.cost += penFactor*dist( vertex.node, point );
+				vertex.cost[pos] = penFactor*dist( vertex.node, point ) + pos > 0 ? vertex.cost[pos-1] : 0.;
 			
 			// shortest-path on network
 			// Bellman-Ford relaxation for simplicity
@@ -118,10 +118,10 @@ implements MapMatchingAlgo {
 			do {
 				relaxed = false;
 				for ( arc in g.arcs ) {
-					var tentative = arc.from.cost + arc.cost;
-					if ( arc.to.cost > tentative ) {
+					var tentative = arc.from.cost[pos] + arc.cost;
+					if ( arc.to.cost[pos] > tentative ) {
 						relaxed = true;
-						arc.to.cost = tentative;
+						arc.to.cost[pos] = tentative;
 						arc.to.parent[pos] = arc;
 					}
 				}
@@ -134,9 +134,10 @@ implements MapMatchingAlgo {
 		var to = null;
 		var bestCost = Math.POSITIVE_INFINITY;
 		for ( vertex in g.vertices ) {
-			if ( vertex.cost < bestCost ) {
+			var pos = vertex.cost.length - 1;
+			if ( vertex.cost[pos] < bestCost ) {
 				to = vertex;
-				bestCost = vertex.cost;
+				bestCost = vertex.cost[pos];
 			}
 		}
 
@@ -186,7 +187,7 @@ implements MapMatchingAlgo {
 private
 typedef Vertex = {
 	var node:Node;
-	var cost:Float;
+	var cost:Array<Float>;
 	var parent:Array<Arc>;
 }
 
@@ -254,7 +255,7 @@ extends TestCase {
 		for ( v in precedence ) {
 			var node = new Node( 0., 0. );
 			var cost:Float = v[0]; // "id" saved in the cost
-			vs[v[0]] = { node:node, cost:cost, parent:[] };
+			vs[v[0]] = { node:node, cost:[cost], parent:[] };
 		}
 		// arcs
 		var arcs = new Array<Arc>();
@@ -279,7 +280,7 @@ extends TestCase {
 		var g = graphIt( precedence );
 		var to = null;
 		for ( v in g.vertices )
-			if ( Math.abs( v.cost - end ) < .01 )
+			if ( Math.abs( v.cost[v.cost.length-1] - end ) < .01 )
 				to = v;
 		if ( to == null )
 			throw "Ops!";
