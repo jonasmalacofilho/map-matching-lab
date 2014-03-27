@@ -2,6 +2,7 @@ import Config;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
+import Log.debug;
 import mapMatching.MapMatchingAlgo;
 import mapMatching.Shrimp;
 import Math.*;
@@ -76,15 +77,17 @@ class Lab {
 			function linkId( seg ) return seg.direction == FromTo ? seg.link.id : -seg.link.id;
 			var name = test.algo.algorithmName+"_"+test.network.name+"_"+test.track.setName+"_"+test.track.id;
 
-			trace( "problem: " + name );
-			trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
-			trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
 
-			if ( test.levenshteinDistance > 0. )
-				trace( "** levenstein distance: " + test.levenshteinDistance );
+			var dbuf = new StringBuf();
+			dbuf.add("problem: " + name + "\n");
+			dbuf.add("expected: " + Lambda.map(test.expectedPath, linkId) + "\n");
+			dbuf.add("matched: " + Lambda.map(test.matchedPath, linkId) + "\n");
+			if (test.levenshteinDistance > 0.)
+				dbuf.add("** levenstein distance: " + test.levenshteinDistance + "\n");
+			debug(dbuf.toString());
 
-			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap ) ) );
-			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap ) ) );
+			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap)));
+			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap)));
 		}
 	}
 
@@ -96,7 +99,7 @@ class Lab {
 	}
 
 	function readNetwork( specs:NetworkSpecs ) {
-		trace( specs );
+		debug( specs );
 		var network = new Network( specs.name );
 		var nodes = [];
 
@@ -168,7 +171,7 @@ class Lab {
 				var data:{ id:Int } = feature.properties;
 				tracks.push( { setName:specs.name, id:data.id, points:points.map( toPoint ) } );
 			case all:
-				trace( 'ignored feature with geometry of type $all' );
+				debug( 'ignored feature with geometry of type $all' );
 			}
 		}
 		return tracks;
