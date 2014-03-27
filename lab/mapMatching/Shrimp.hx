@@ -11,6 +11,22 @@ import prim.Track;
 
 /**
 	Shrimp - Simplified TrImp3 map-matching algorithm
+
+	This solves simplified instances of the problems, but doesn't handle loops
+	all that well.
+
+	Shrimp is based on the ideia of multiple shortest paths on the network, where
+	vertices are penalized by their distance to the current point being analyzed.
+
+	In really, the single source shortest paths problems actually can be used to
+	compute the paths from a group of origins; in this context, the actual source
+	will be only be determinated (for a given path, i.e., a destination) after
+	all arcs have been relaxed.
+
+	Each of the multiple shortest paths in Shrimp reuses state from the previous
+	one, and one is computed for each input point. Only after all of the input
+	has been used, that a best global solution is choosen by the algorithm.
+
 	Original TrImp algorithm (versions 0.x-3.x) by Jonas Malaco Filho, 2013.
 **/
 class Shrimp
@@ -107,8 +123,10 @@ implements MapMatchingAlgo {
 			var point = points[pos];
 
 			// point to node penalty
-			var penFactor = ( pos == 0 || pos == points.length - 1 ) ? 1 : 2;
-			// initial or last point
+			// special behavior for initial and last points
+			// start cost must be larger than dist or the first link can be removed from the path,
+			// since the cost of starting there will be the same
+			var penFactor = ( pos == 0 || pos == points.length - 1 ) ? 1.5 : 2;  
 			for ( vertex in g.vertices )
 				vertex.cost[pos] = penFactor*dist( vertex.node, point ) + (pos > 0 ? vertex.cost[pos-1] : 0.);
 			

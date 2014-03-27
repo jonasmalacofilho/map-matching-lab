@@ -2,7 +2,9 @@ package test;
 
 import haxe.unit.TestCase;
 import mapMatching.MapMatchingAlgo;
-import prim.*;
+import prim.Network;
+import prim.Path;
+import prim.Track;
 import SimpleGeography;
 
 import Lambda.*;
@@ -73,7 +75,7 @@ extends TestCase {
 	}
 
 	function levenshteinAlign( expected:Path, matched:Null<Path> ) {
-		var dist = function ( a, b ) return a==b ? 0 : 1;
+		var dist = function ( a:PathSegment, b:PathSegment ) return a.link == b.link && a.direction == b.direction ? 0 : 1;
 		var skip = function ( a, b, c ) return 1;
 		var al = NeedlemanWunsch.globalAlignment( array( expected ), ( matched != null ? array( matched ) : [] ), dist, skip );
 		return al.distance;

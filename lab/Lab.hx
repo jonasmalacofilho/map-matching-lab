@@ -80,6 +80,9 @@ class Lab {
 			trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
 			trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
 
+			if ( test.levenshteinDistance > 0. )
+				trace( "** levenstein distance: " + test.levenshteinDistance );
+
 			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap ) ) );
 			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap ) ) );
 		}
