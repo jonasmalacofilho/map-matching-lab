@@ -53,9 +53,14 @@ implements MapMatchingAlgo {
 			tempNodeIds.set(v.node, vi++);
 		// print the costs and parents
 		while (--pos >= 0) {
-			var vi = 0;
+			var minCost = Math.POSITIVE_INFINITY;
+			var minCostId = -1;
 			for (v in g.vertices) {
 				b.add('level $pos: node ${tempNodeIds.get(v.node)}: cost ${v.cost} parent ');
+				if (v.cost < minCost) {
+					minCost = v.cost;
+					minCostId = tempNodeIds.get(v.node);
+				}
 				if (v.parent[pos] != null) {
 					var arc = v.parent[pos];
 					b.add('${arc.link.id} (${tempNodeIds.get(arc.from.node)} -> ${tempNodeIds.get(arc.to.node)})\n');
@@ -64,7 +69,7 @@ implements MapMatchingAlgo {
 					b.add("null\n");
 				}
 			}
-			b.add("\n");
+			b.add('Minimum cost at $minCostId: $minCost\n\n');
 		}
 
 		debug(b.toString());
