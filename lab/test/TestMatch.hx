@@ -2,7 +2,9 @@ package test;
 
 import haxe.unit.TestCase;
 import mapMatching.MapMatchingAlgo;
-import prim.*;
+import prim.Network;
+import prim.Path;
+import prim.Track;
 import SimpleGeography;
 
 import Lambda.*;
@@ -73,7 +75,7 @@ extends TestCase {
 	}
 
 	function levenshteinAlign( expected:Path, matched:Null<Path> ) {
-		var dist = function ( a, b ) return a==b ? 0 : 1;
+		var dist = function ( a:PathSegment, b:PathSegment ) return a.link == b.link && a.direction == b.direction ? 0 : 1;
 		var skip = function ( a, b, c ) return 1;
 		var al = NeedlemanWunsch.globalAlignment( array( expected ), ( matched != null ? array( matched ) : [] ), dist, skip );
 		return al.distance;
@@ -82,12 +84,16 @@ extends TestCase {
 	function mapPath( path:Path ) {
 		var col:GeographySet = { features:[] };
 		var pos = 0;
-		for ( link in path ) {
-			var from = { x:link.from.x, y:link.from.y, zs:null };
-			var to = { x:link.to.x, y:link.to.y, zs:null };
+		for ( seg in path ) {
+			var from = { x:seg.link.from.x, y:seg.link.from.y, zs:null };
+			var to = { x:seg.link.to.x, y:seg.link.to.y, zs:null };
+			var shp = switch ( seg.direction ) {
+			case FromTo: [ from, to ];
+			case ToFrom: [ to, from ];
+			};
 			var feature = {
-				geometry:LineString( [ from, to ] ),
-				properties:{ linkId:link.id, posInPath:pos }
+				geometry:LineString( shp ),
+				properties:{ linkId:seg.link.id, posInPath:pos }
 			}
 			col.features.push( feature );
 		}

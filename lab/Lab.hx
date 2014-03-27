@@ -2,6 +2,7 @@ import Config;
 import haxe.Json;
 import haxe.unit.TestRunner;
 import Lambda.*;
+import Log.debug;
 import mapMatching.BlueSwiss;
 import mapMatching.MapMatchingAlgo;
 import mapMatching.Shrimp;
@@ -47,7 +48,16 @@ class Lab {
 				var answers = readAnswers( setSpec );
 
 				for ( track in tracks ) {
-					var answer = answers.get( track.id ).map( network.links.get );
+					var answer = answers.get( track.id ).map(
+						function ( linkId ) {
+							if ( linkId > 0 ) {
+								return { direction:FromTo, link:network.links.get( linkId ) };
+							}
+							else {
+								return { direction:ToFrom, link:network.links.get( -linkId ) };
+							}
+						}
+					);
 
 					var test = new TestMatch( initAlgo( algo ), network, track, answer );
 					tests.push( test );
@@ -65,15 +75,20 @@ class Lab {
 		algoTest.runner.run();
 
 		for ( test in algoTest.tests ) {
-			function linkId( link ) return link.id;
+			function linkId( seg ) return seg.direction == FromTo ? seg.link.id : -seg.link.id;
 			var name = test.algo.algorithmName+"_"+test.network.name+"_"+test.track.setName+"_"+test.track.id;
 
-			trace( "problem: " + name );
-			trace( "expected: " + Lambda.map( test.expectedPath, linkId ) );
-			trace( "matched: " + Lambda.map( test.matchedPath, linkId ) );
 
-			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap ) ) );
-			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap ) ) );
+			var dbuf = new StringBuf();
+			dbuf.add("problem: " + name + "\n");
+			dbuf.add("expected: " + Lambda.map(test.expectedPath, linkId) + "\n");
+			dbuf.add("matched: " + Lambda.map(test.matchedPath, linkId) + "\n");
+			if (test.levenshteinDistance > 0.)
+				dbuf.add("** levenstein distance: " + test.levenshteinDistance + "\n");
+			debug(dbuf.toString());
+
+			File.saveContent( name + "_matchedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.matchedMap)));
+			File.saveContent( name + "_expectedPath.json", Json.stringify( SimpleGeography.toGeoJson( test.debugInformation.expectedMap)));
 		}
 	}
 
@@ -86,7 +101,7 @@ class Lab {
 	}
 
 	function readNetwork( specs:NetworkSpecs ) {
-		trace( specs );
+		debug( specs );
 		var network = new Network( specs.name );
 		var nodes = [];
 
@@ -158,7 +173,7 @@ class Lab {
 				var data:{ id:Int } = feature.properties;
 				tracks.push( { setName:specs.name, id:data.id, points:points.map( toPoint ) } );
 			case all:
-				trace( 'ignored feature with geometry of type $all' );
+				debug( 'ignored feature with geometry of type $all' );
 			}
 		}
 		return tracks;
