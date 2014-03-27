@@ -18,12 +18,12 @@ class Log {
 	}
 
 	public static
-	function debug(msg:String, ?pos:PosInfos) {
+	function debug(msg:Dynamic, ?pos:PosInfos) {
 		writeString('$$$$  Debug...  from ${pos.fileName}:${pos.lineNumber}  $$$$\n\n$msg\n\n');
 	}
 
 	public static
-	function warning(msg:String, ?pos:PosInfos) {
+	function warning(msg:Dynamic, ?pos:PosInfos) {
 		writeString('$$$$  Warning!  from ${pos.fileName}:${pos.lineNumber}  $$$$\n\n$msg\n\n');
 	}
 
