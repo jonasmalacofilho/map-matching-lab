@@ -1,6 +1,6 @@
 Map-matching lab
 ================
-_A lab for developing and testing map-matching algorithms_
+_An old work-in-progress lab for developing and testing map-matching algorithms_
 
 
 The problem
@@ -30,5 +30,4 @@ TrImp3 solves map-matching problems by computing multiple shortest paths between
 
 Map-matching with multiple shortest paths on the graphs of link fit to each input point.
 
-The weird (temporary) codename comes from what I was eating at time I had the idea: a sandwich with blue cheese and a box of Lindt chocolates.
 
