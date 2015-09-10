@@ -28,6 +28,6 @@ TrImp3 solves map-matching problems by computing multiple shortest paths between
 
 #### BlueSwiss
 
-Map-matching with multiple shortest paths on the graphs of link fit to each input point.
+Map-matching with multiple shortest paths on the graph of link fit to each input point.
 
 
